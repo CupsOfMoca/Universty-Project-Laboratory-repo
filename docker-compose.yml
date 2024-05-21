@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+
+  initializer:
+    image: alpine
+    container_name: solr-initializer
+    restart: "no"
+    entrypoint: |
+      /bin/sh -c "chown 8983:8983 /solr"
+    volumes:
+      - ./data/solr:/solr
+      - ./solrconfig:/opt/solr/server/solr/configsets/my_config
+      
+  solr:
+    depends_on:
+      - initializer
+    container_name: langchain-solr
+    image: solr:9.5.0
+    ports:
+     - "8983:8983"
+    volumes:
+      - ./data/solr:/var/solr/data
+      - ./solrconfig:/opt/solr/server/solr/configsets/my_config
+    entrypoint:
+      - bash
+      - "-c"
+      - solr-precreate langchain
